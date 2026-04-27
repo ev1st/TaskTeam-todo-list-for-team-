@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskTeam - Управление проектами</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --secondary: #764ba2;
+            --danger: #f56565;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --light: #f7fafc;
+            --dark: #2d3748;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.16);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: var(--dark);
+        }
+        
+        .container-main {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: white;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+        }
+        
+        .sidebar-header {
+            padding: 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .sidebar-header h1 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+        
+        .nav-section-title {
+            padding: 12px 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #a0aec0;
+            letter-spacing: 0.5px;
+        }
+        
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+        
+        .nav-item:hover {
+            background: var(--light);
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            background: var(--light);
+            border-left-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--light);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px 32px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+        
+        /* Content */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border-top: 4px solid var(--primary);
+            transition: all 0.3s;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .project-card h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .project-card p {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 16px;
+        }
+        
+        .task-item {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .task-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #718096;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-high {
+            background: #fed7d7;
+            color: var(--danger);
+        }
+        
+        .badge-critical {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .badge-medium {
+            background: #feebc8;
+            color: var(--warning);
+        }
+        
+        .badge-low {
+            background: #c6f6d5;
+            color: var(--success);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #718096;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 48px 32px;
+            color: #718096;
+        }
+        
+        .sidebar-clock {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        
+        .clock-display {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .date-display {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 12px;
+        }
+        
+        .mini-calendar {
+            font-size: 11px;
+            color: #4a5568;
+        }
+        
+        .mini-calendar-day {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            margin-top: 8px;
+        }
+        
+        .mini-calendar-day div {
+            text-align: center;
+            padding: 2px;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px;
+        }
+        
+        .mini-calendar-day div.today {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-main">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div>
+                    <h1>TaskTeam</h1>
+                    <p>Управление проектами</p>
+                </div>
+            </div>
+            
+            <div class="sidebar-nav">
+                <div class="nav-section-title">МЕНЮ</div>
+                <div class="nav-item active" onclick="switchPage('dashboard')">Панель управления</div>
+                <div class="nav-item" onclick="switchPage('projects')">Проекты</div>
+                <div class="nav-item" onclick="switchPage('tasks')">Задачи</div>
+                <div class="nav-item" onclick="switchPage('teams')">Команды</div>
+            </div>
+            
+            <div class="sidebar-clock">
+                <div class="clock-display" id="clockDisplay">00:00</div>
+                <div class="date-display" id="dateDisplay">День недели</div>
+                <div class="mini-calendar">
+                    <div style="font-weight: 600; margin-bottom:4px" id="monthDisplay">Месяц 2026</div>
+                    <div class="mini-calendar-day" id="miniCalendar"></div>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile" onclick="openProfileModal()" style="cursor: pointer; margin-bottom: 8px;">
+                    <div class="user-avatar" id="userAvatar">А</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <p id="username" style="font-size: 13px; font-weight: 600;">Пользователь</p>
+                        <p style="font-size: 11px; color: #a0aec0;">Профиль</p>
+                    </div>
+                </div>
+                <div class="user-profile" onclick="logout()" style="cursor: pointer;">
+                    <div class="user-avatar" style="background: #e53e3e;">🚪</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <p style="font-size: 13px; font-weight: 600;">Выход</p>
+                        <p style="font-size: 11px; color: #a0aec0;">Выйти из системы</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h2 class="header-title" id="pageTitle">Панель управления</h2>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="createBtn" onclick="openCreateModal()" style="display:none;">+ Создать</button>
+                </div>
+            </div>
+            
+            <div class="content">
+                <!-- Dashboard Page -->
+                <div id="dashboard" class="page-section">
+                    <div class="card">
+                        <div class="card-title">
+                            Добро пожаловать в TaskTeam
+                            <span id="welcomeUser" style="font-size: 16px; font-weight: 400;"></span>
+                        </div>
+                        <p>Это система управления проектами и задачами для команд.</p>
+                    </div>
+
+                    <h3 style="margin-bottom: 20px;">Ваши проекты</h3>
+                    <div id="dashboardProjects" class="grid"></div>
+                    
+                    <h3 style="margin-bottom: 20px;">Ваши команды</h3>
+                    <div id="dashboardTeams" class="grid"></div>
+                </div>
+                
+                <!-- Projects Page -->
+                <div id="projects" class="page-section" style="display:none;">
+                    <div class="card">
+                        <div class="card-title">
+                            Проекты
+                            <button class="btn btn-primary" onclick="openProjectModal()">+ Новый проект</button>
+                        </div>
+                        <div id="projectsList" class="grid"></div>
+                    </div>
+                </div>
+                
+                <!-- Tasks Page -->
+                <div id="tasks" class="page-section" style="display:none;">
+                    <div class="card">
+                        <div class="card-title">
+                            Все задачи
+                            <button class="btn btn-primary" onclick="openTaskModal()">+ Новая задача</button>
+                        </div>
+                        <div id="tasksList"></div>
+                    </div>
+                </div>
+                
+                <!-- Teams Page -->
+                <div id="teams" class="page-section" style="display:none;">
+                    <div class="card">
+                        <div class="card-title">
+                            Команды
+                            <button class="btn btn-primary" onclick="openTeamModal()">+ Новая команда</button>
+                        </div>
+                        <div id="teamsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Project Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Создать проект</span>
+                <button class="modal-close" onclick="closeProjectModal()">×</button>
+            </div>
+            <form onsubmit="saveProject(event)">
+                <div class="form-group">
+                    <label>Название проекта</label>
+                    <input type="text" id="projectName" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="projectDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Цвет</label>
+                    <input type="color" id="projectColor" value="#667eea">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeProjectModal()" style="background: #e2e8f0; color: var(--dark);">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Создать задачу</span>
+                <button class="modal-close" onclick="closeTaskModal()">×</button>
+            </div>
+            <form onsubmit="saveTask(event)">
+                <div class="form-group">
+                    <label>Название задачи</label>
+                    <input type="text" id="taskTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="taskDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Тип задачи</label>
+                    <select id="taskType" onchange="updateTaskTeamProject()">
+                        <option value="personal">Личная задача</option>
+                        <option value="team">Задача команды</option>
+                    </select>
+                </div>
+                <div class="form-group" id="taskTeamGroup" style="display:none;">
+                    <label>Команда</label>
+                    <select id="taskTeam" onchange="onTeamSelectChange()">
+                        <option value="">Выберите команду</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Проект</label>
+                    <select id="taskProject">
+                        <option value="">Выберите проект</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Приоритет</label>
+                    <select id="taskPriority">
+                        <option value="Low">Низкий</option>
+                        <option value="Medium" selected>Средний</option>
+                        <option value="High">Высокий</option>
+                        <option value="Critical">Критический</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Срок выполнения</label>
+                    <input type="datetime-local" id="taskDueDate">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeTaskModal()" style="background: #e2e8f0; color: var(--dark);">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Team Modal -->
+    <div id="teamModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Создать команду</span>
+                <button class="modal-close" onclick="closeTeamModal()">×</button>
+            </div>
+            <form onsubmit="saveTeam(event)">
+                <div class="form-group">
+                    <label>Название команды</label>
+                    <input type="text" id="teamName" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea id="teamDescription"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeTeamModal()" style="background: #e2e8f0; color: var(--dark);">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Add Team Member Modal -->
+    <div id="addMemberModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Добавить участника в команду</span>
+                <button class="modal-close" onclick="closeAddMemberModal()">×</button>
+            </div>
+            <form onsubmit="addTeamMember(event)">
+                <div class="form-group">
+                    <label>Имя пользователя</label>
+                    <input type="text" id="memberUsername" required placeholder="Введите никнейм пользователя">
+                </div>
+                <div class="form-group">
+                    <label>Роль</label>
+                    <select id="memberRole">
+                        <option value="member">Участник</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeAddMemberModal()" style="background: #e2e8f0; color: var(--dark);">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Профиль пользователя</span>
+                <button class="modal-close" onclick="closeProfileModal()">×</button>
+            </div>
+            <form onsubmit="updateProfile(event)">
+                <div class="form-group">
+                    <label>Имя пользователя</label>
+                    <input type="text" id="profileUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Новый пароль (оставьте пустым, чтобы не менять)</label>
+                    <input type="password" id="profilePassword" placeholder="Введите новый пароль">
+                </div>
+                <div class="form-group">
+                    <label>Подтвердите новый пароль</label>
+                    <input type="password" id="profileConfirmPassword" placeholder="Подтвердите новый пароль">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeProfileModal()" style="background: #e2e8f0; color: var(--dark);">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+        let currentUser = null;
+        let projects = [];
+        let tasks = [];
+        let teams = [];
+        let users = [];
+        
+        async function init() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            try {
+                const userRes = await fetch(`${API_URL}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!userRes.ok) throw new Error('Not authenticated');
+                
+                currentUser = await userRes.json();
+                document.getElementById('username').textContent = currentUser.username;
+                document.getElementById('userAvatar').textContent = currentUser.username[0].toUpperCase();
+                document.getElementById('welcomeUser').textContent = `, ${currentUser.username}!`;
+                
+                await loadData();
+                updateDashboard();
+                
+                // Инициализируем часы и календарь
+                updateClock();
+                setInterval(updateClock, 60000); // Обновляем каждые 60 секунд
+            } catch (error) {
+                console.error(error);
+                logout();
+            }
+        }
+        
+        async function loadData() {
+            const token = localStorage.getItem('token');
+            
+            try {
+                const [projectsRes, tasksRes, teamsRes, usersRes] = await Promise.all([
+                    fetch(`${API_URL}/projects/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/tasks/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/teams/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                    fetch(`${API_URL}/users/`, { headers: { 'Authorization': `Bearer ${token}` } })
+                ]);
+                
+                if (projectsRes.ok) projects = await projectsRes.json();
+                if (tasksRes.ok) tasks = await tasksRes.json();
+                if (teamsRes.ok) teams = await teamsRes.json();
+                if (usersRes.ok) users = await usersRes.json();
+                
+                updateUI();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+        
+        function updateUI() {
+            updateProjectSelect();
+            updateProjectsList();
+            updateTasksList();
+            updateTeamsList();
+        }
+        
+        function updateDashboard() {
+            const dashProjects = document.getElementById('dashboardProjects');
+            dashProjects.innerHTML = projects.slice(0, 3).map(p => `
+                <div class="project-card" style="border-top-color: ${p.color}">
+                    <h3>${p.name}</h3>
+                    <p>${p.description || 'Нет описания'}</p>
+                </div>
+            `).join('') || '<div class="empty-state">Нет проектов</div>';
+            
+            const dashTeams = document.getElementById('dashboardTeams');
+            dashTeams.innerHTML = teams.slice(0, 3).map(t => `
+                <div class="project-card">
+                    <h3>${t.name}</h3>
+                    <p>${t.description || 'Нет описания'}</p>
+                </div>
+            `).join('') || '<div class="empty-state">Нет команд</div>';
+        }
+        
+        function updateProjectsList() {
+            const list = document.getElementById('projectsList');
+            list.innerHTML = projects.map(p => `
+                <div class="project-card" style="border-top-color: ${p.color}">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                        <h3>${p.name}</h3>
+                        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="deleteProject(${p.id})">×</button>
+                    </div>
+                    <p>${p.description || 'Нет описания'}</p>
+                    <div style="font-size: 12px; color: #718096;">Задач: ${tasks.filter(t => t.project_id === p.id).length}</div>
+                </div>
+            `).join('') || '<div class="empty-state">Нет проектов</div>';
+        }
+        
+        function updateTasksList() {
+            const list = document.getElementById('tasksList');
+            const now = new Date();
+            const priorityMap = { 'low': 'Низкий', 'medium': 'Средний', 'high': 'Высокий', 'critical': 'Критический' };
+            list.innerHTML = tasks.map(t => {
+                const project = projects.find(p => p.id === t.project_id);
+                const isDone = t.status === 'DONE';
+                const dueDate = t.due_date ? new Date(t.due_date.endsWith('Z') ? t.due_date : t.due_date + 'Z') : null;
+                const isOverdue = dueDate && !isDone && dueDate.getTime() < now.getTime();
+                const displayStatus = isOverdue && t.status !== 'OVERDUE' ? 'OVERDUE' : t.status;
+                const titleHtml = isDone ? `<s>${t.title}</s>` : t.title;
+                const priorityText = priorityMap[t.priority.toLowerCase()] || t.priority;
+                console.log('Task:', t.title, 'priority:', t.priority, 'priorityText:', priorityText);
+                return `
+                    <div class="task-item">
+                        <div>
+                            <div class="task-title">${titleHtml}</div>
+                            <div class="task-meta">
+                                <span class="badge badge-${t.priority.toLowerCase()}">${priorityText}</span>
+                                ${project ? `<span>Проект: ${project.name}</span>` : ''}
+                                ${dueDate ? `<span>Срок: ${dueDate.toLocaleDateString('ru-RU')}</span>` : ''}
+                                ${isOverdue ? `<span style="color:#e53e3e; font-weight:600; margin-left:8px;">Просрочено</span>` : ''}
+                                ${t.assignee_id ? `<span style="margin-left:8px;">${t.assignee_id === currentUser.id ? 'Вам' : (users.find(u => u.id === t.assignee_id)?.username || 'Пользователю #' + t.assignee_id)}</span>` : '<span style="margin-left:8px; color:#718096;">Не назначена</span>'}
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center">
+                            <select onchange="changeTaskStatus(${t.id}, this.value)">
+                                <option value="TODO" ${displayStatus==='TODO'?'selected':''}>Новая</option>
+                                <option value="IN_PROGRESS" ${displayStatus==='IN_PROGRESS'?'selected':''}>В процессе</option>
+                                <option value="REVIEW" ${displayStatus==='REVIEW'?'selected':''}>На проверке</option>
+                                ${isOverdue && t.status !== 'OVERDUE' ? `<option value="OVERDUE" selected>Просрочено</option>` : ''}
+                                <option value="DONE" ${displayStatus==='DONE'?'selected':''}>Выполнено</option>
+                            </select>
+                            ${!t.assignee_id ? `<button class="btn btn-primary" onclick="assignTask(${t.id})">Взять на выполнение</button>` : ''}
+                            <button class="btn btn-danger" style="padding: 4px 8px;" onclick="deleteTask(${t.id})">Удалить</button>
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<div class="empty-state">Нет задач</div>';
+        }
+        
+        function updateTeamsList() {
+            const list = document.getElementById('teamsList');
+            list.innerHTML = teams.map(t => `
+                <div class="project-card">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                        <h3>${t.name}</h3>
+                        <div style="display:flex; gap:8px">
+                            <button class="btn btn-primary" style="padding: 4px 8px; font-size: 12px;" onclick="openAddMemberModal(${t.id})">Добавить</button>
+                            <button class="btn" style="padding: 4px 8px; font-size: 12px;" onclick="viewTeamTasks(${t.id}, '${t.name.replace("'","\'" )}')">Задачи</button>
+                            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="deleteTeam(${t.id})">Удалить</button>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <strong>Участники:</strong>
+                        <div style="margin-top: 8px;">
+                            ${t.members.map(m => `
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span>${m.username}</span>
+                                    ${currentUser.id === t.owner_id && m.id !== t.owner_id ? `<button class="btn btn-danger" style="padding: 2px 6px; font-size: 10px;" onclick="removeMember(${t.id}, ${m.id})">Удалить</button>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <p>${t.description || 'Нет описания'}</p>
+                </div>
+            `).join('') || '<div class="empty-state">Нет команд</div>';
+        }
+
+        // Показываем задачи выбранной команды (видим все задачи команды для её участников)
+        async function viewTeamTasks(teamId, teamName) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_URL}/teams/${teamId}/tasks`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) {
+                    alert('Не удалось загрузить задачи команды');
+                    return;
+                }
+                const teamTasks = await res.json();
+                // Показываем страницу задач и отображаем задачи команды
+                switchPage('tasks');
+                document.getElementById('pageTitle').textContent = `Задачи команды: ${teamName}`;
+                const list = document.getElementById('tasksList');
+                const now = new Date();
+                const priorityMap = { 'low': 'Низкий', 'medium': 'Средний', 'high': 'Высокий', 'critical': 'Критический' };
+                list.innerHTML = teamTasks.map(t => {
+                    const project = projects.find(p => p.id === t.project_id);
+                    const isDone = t.status === 'DONE';
+                    const dueDate = t.due_date ? new Date(t.due_date.endsWith('Z') ? t.due_date : t.due_date + 'Z') : null;
+                    const isOverdue = dueDate && !isDone && dueDate.getTime() < now.getTime();
+                    const displayStatus = isOverdue && t.status !== 'OVERDUE' ? 'OVERDUE' : t.status;
+                    const titleHtml = isDone ? `<s>${t.title}</s>` : t.title;
+                    const priorityText = priorityMap[t.priority.toLowerCase()] || t.priority;
+                    return `
+                        <div class="task-item">
+                            <div>
+                                <div class="task-title">${titleHtml}</div>
+                                <div class="task-meta">
+                                    <span class="badge badge-${t.priority.toLowerCase()}">${priorityText}</span>
+                                    ${project ? `<span>Проект: ${project.name}</span>` : ''}
+                                    ${dueDate ? `<span>Срок: ${dueDate.toLocaleDateString('ru-RU')}</span>` : ''}
+                                    ${isOverdue ? `<span style="color:#e53e3e; font-weight:600; margin-left:8px;">Просрочено</span>` : ''}
+                                    ${t.assignee_id ? `<span style="margin-left:8px;">${t.assignee_id === currentUser.id ? 'Вам' : (users.find(u => u.id === t.assignee_id)?.username || 'Пользователю #' + t.assignee_id)}</span>` : '<span style="margin-left:8px; color:#718096;">Не назначена</span>'}
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:8px; align-items:center">
+                                <select onchange="changeTaskStatus(${t.id}, this.value)">
+                                    <option value="TODO" ${displayStatus==='TODO'?'selected':''}>Новая</option>
+                                    <option value="IN_PROGRESS" ${displayStatus==='IN_PROGRESS'?'selected':''}>В процессе</option>
+                                    <option value="REVIEW" ${displayStatus==='REVIEW'?'selected':''}>На проверке</option>
+                                    ${isOverdue && t.status !== 'OVERDUE' ? `<option value="OVERDUE" selected>Просрочено</option>` : ''}
+                                    <option value="DONE" ${displayStatus==='DONE'?'selected':''}>Выполнено</option>
+                                </select>
+                                ${!t.assignee_id ? `<button class="btn btn-primary" onclick="assignTask(${t.id})">Взять на выполнение</button>` : ''}
+                                <button class="btn btn-danger" style="padding: 4px 8px;" onclick="deleteTask(${t.id})">Удалить</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('') || '<div class="empty-state">Нет задач в этой команде</div>';
+                // Показываем кнопку очистки фильтра
+                document.getElementById('createBtn').style.display = 'inline-block';
+                document.getElementById('createBtn').textContent = 'Показать все задачи';
+                document.getElementById('createBtn').onclick = async () => { await loadData(); document.getElementById('createBtn').style.display='none'; document.getElementById('pageTitle').textContent='Панель управления'; };
+            } catch (error) {
+                console.error('Error fetching team tasks:', error);
+            }
+        }
+        
+        function updateProjectSelect() {
+            const select = document.getElementById('taskProject');
+            select.innerHTML = '<option value="">Личные задачи</option>' + 
+                projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        }
+        
+        async function saveProject(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            
+            const data = {
+                name: document.getElementById('projectName').value,
+                description: document.getElementById('projectDescription').value,
+                color: document.getElementById('projectColor').value
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/projects/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    closeProjectModal();
+                    await loadData();
+                    updateDashboard();
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        
+        function updateTaskTeamProject() {
+            const taskType = document.getElementById('taskType').value;
+            const teamGroup = document.getElementById('taskTeamGroup');
+            
+            if (taskType === 'team') {
+                teamGroup.style.display = 'block';
+            } else {
+                teamGroup.style.display = 'none';
+                document.getElementById('taskTeam').value = '';
+            }
+        }
+        
+        async function onTeamSelectChange() {
+            const token = localStorage.getItem('token');
+            const teamId = document.getElementById('taskTeam').value;
+            
+            if (!teamId) {
+                // Если команда не выбрана, показываем все проекты
+                try {
+                    const res = await fetch(`${API_URL}/projects/`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    if (res.ok) {
+                        const projects = await res.json();
+                        const projectSelect = document.getElementById('taskProject');
+                        projectSelect.innerHTML = '<option value="">Выберите проект</option>';
+                        
+                        projects.forEach(project => {
+                            const option = document.createElement('option');
+                            option.value = project.id;
+                            option.textContent = project.name;
+                            projectSelect.appendChild(option);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Ошибка при загрузке проектов:', error);
+                }
+            } else {
+                // Загружаем проекты команды
+                try {
+                    const res = await fetch(`${API_URL}/teams/${teamId}/projects/`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    if (res.ok) {
+                        const projects = await res.json();
+                        const projectSelect = document.getElementById('taskProject');
+                        projectSelect.innerHTML = '<option value="">Выберите проект команды</option>';
+                        
+                        projects.forEach(project => {
+                            const option = document.createElement('option');
+                            option.value = project.id;
+                            option.textContent = project.name;
+                            projectSelect.appendChild(option);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Ошибка при загрузке проектов команды:', error);
+                }
+            }
+        }
+        
+        async function saveTask(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const taskType = document.getElementById('taskType').value;
+            
+            const data = {
+                title: document.getElementById('taskTitle').value,
+                description: document.getElementById('taskDescription').value,
+                priority: document.getElementById('taskPriority').value,
+                due_date: document.getElementById('taskDueDate').value ? new Date(document.getElementById('taskDueDate').value).toISOString() : null
+            };
+            
+            // Для личных задач project_id = null
+            // Для командных задач - получаем team_id и ищем проект этой команды
+            if (taskType === 'personal') {
+                data.project_id = null;
+            } else {
+                const teamId = parseInt(document.getElementById('taskTeam').value);
+                const projectId = document.getElementById('taskProject').value ? parseInt(document.getElementById('taskProject').value) : null;
+                
+                if (!teamId) {
+                    alert('Выберите команду для командной задачи');
+                    return;
+                }
+                
+                data.project_id = projectId;
+                data.team_id = teamId;
+            }
+            
+            try {
+                const res = await fetch(`${API_URL}/tasks/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    closeTaskModal();
+                    await loadData();
+                } else {
+                    const error = await res.json();
+                    alert('Ошибка при создании задачи: ' + (error.detail || res.statusText));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Ошибка при создании задачи');
+            }
+        }
+        
+        async function saveTeam(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            console.log('saveTeam called, token:', token);
+            
+            const data = {
+                name: document.getElementById('teamName').value,
+                description: document.getElementById('teamDescription').value
+            };
+            console.log('Data:', data);
+            
+            try {
+                const res = await fetch(`${API_URL}/teams/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    closeTeamModal();
+                    await loadData();
+                    updateDashboard();
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        
+        async function deleteProject(id) {
+            if (!confirm('Удалить проект?')) return;
+            // Add DELETE endpoint
+            await loadData();
+        }
+        
+        async function deleteTask(id) {
+            if (!confirm('Удалить задачу?')) return;
+            const token = localStorage.getItem('token');
+            
+            try {
+                await fetch(`${API_URL}/tasks/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                await loadData();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function changeTaskStatus(id, newStatus) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_URL}/tasks/${id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.detail || 'Не удалось изменить статус');
+                    return;
+                }
+                // Обновляем локальный массив задач
+                const updatedTask = await res.json();
+                const taskIndex = tasks.findIndex(t => t.id === id);
+                if (taskIndex !== -1) {
+                    tasks[taskIndex] = updatedTask;
+                }
+                // Перерисовываем список задач
+                updateTasksList();
+                // Если отображаются задачи команды, также обновляем их
+                const pageTitle = document.getElementById('pageTitle').textContent;
+                if (pageTitle.includes('Задачи команды')) {
+                    // Будет перезагружено при следующем обновлении
+                }
+                updateDashboard();
+            } catch (error) {
+                console.error('Error changing status:', error);
+            }
+        }
+
+        async function assignTask(id) {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_URL}/tasks/${id}/assignee`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ assignee_id: currentUser.id })
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.detail || 'Не удалось взять задачу');
+                    return;
+                }
+                // Обновляем локальный массив задач
+                const updatedTask = await res.json();
+                const taskIndex = tasks.findIndex(t => t.id === id);
+                if (taskIndex !== -1) {
+                    tasks[taskIndex] = updatedTask;
+                }
+                // Перерисовываем список задач
+                updateTasksList();
+                updateDashboard();
+            } catch (error) {
+                console.error('Error assigning task:', error);
+            }
+        }
+
+        async function removeMember(teamId, memberId) {
+            if (!confirm('Вы уверены, что хотите удалить этого участника из команды?')) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_URL}/teams/${teamId}/members/${memberId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.detail || 'Не удалось удалить участника');
+                    return;
+                }
+                await loadData(); // Перезагрузить данные
+            } catch (error) {
+                console.error('Error removing member:', error);
+            }
+        }
+        
+        async function deleteTeam(id) {
+            if (!confirm('Удалить команду?')) return;
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_URL}/teams/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.detail || 'Не удалось удалить команду');
+                    return;
+                }
+                await loadData();
+                alert('Команда удалена');
+            } catch (error) {
+                console.error('Error deleting team:', error);
+                alert('Ошибка при удалении команды');
+            }
+        }
+        
+        function switchPage(page) {
+            document.querySelectorAll('.page-section').forEach(el => el.style.display = 'none');
+            document.getElementById(page).style.display = 'block';
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            
+            const titles = {
+                dashboard: 'Панель управления',
+                projects: 'Проекты',
+                tasks: 'Задачи',
+                teams: 'Команды'
+            };
+            document.getElementById('pageTitle').textContent = titles[page];
+        }
+        
+        function openProjectModal() {
+            document.getElementById('projectModal').classList.add('show');
+        }
+        
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.remove('show');
+        }
+        
+        async function openTaskModal() {
+            const token = localStorage.getItem('token');
+            
+            // Загружаем команды пользователя
+            try {
+                const res = await fetch(`${API_URL}/teams/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (res.ok) {
+                    const teams = await res.json();
+                    const teamSelect = document.getElementById('taskTeam');
+                    teamSelect.innerHTML = '<option value="">Выберите команду</option>';
+                    
+                    teams.forEach(team => {
+                        const option = document.createElement('option');
+                        option.value = team.id;
+                        option.textContent = team.name;
+                        teamSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке команд:', error);
+            }
+            
+            // Загружаем проекты пользователя
+            try {
+                const res = await fetch(`${API_URL}/projects/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (res.ok) {
+                    const projects = await res.json();
+                    const projectSelect = document.getElementById('taskProject');
+                    projectSelect.innerHTML = '<option value="">Выберите проект</option>';
+                    
+                    projects.forEach(project => {
+                        const option = document.createElement('option');
+                        option.value = project.id;
+                        option.textContent = project.name;
+                        projectSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке проектов:', error);
+            }
+            
+            // Сбрасываем форму и показываем модал
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDescription').value = '';
+            document.getElementById('taskType').value = 'personal';
+            document.getElementById('taskTeam').value = '';
+            document.getElementById('taskProject').value = '';
+            document.getElementById('taskPriority').value = 'Medium';
+            document.getElementById('taskDueDate').value = '';
+            document.getElementById('taskTeamGroup').style.display = 'none';
+            
+            document.getElementById('taskModal').classList.add('show');
+        }
+        
+        function closeTaskModal() {
+            document.getElementById('taskModal').classList.remove('show');
+        }
+        
+        function openTeamModal() {
+            document.getElementById('teamModal').classList.add('show');
+        }
+        
+        function closeTeamModal() {
+            document.getElementById('teamModal').classList.remove('show');
+        }
+
+        function openAddMemberModal(teamId = null) {
+            document.getElementById('addMemberModal').dataset.teamId = teamId || '';
+            document.getElementById('addMemberModal').classList.add('show');
+        }
+        
+        function closeAddMemberModal() {
+            document.getElementById('addMemberModal').classList.remove('show');
+        }
+
+        async function addTeamMember(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const teamId = document.getElementById('addMemberModal').dataset.teamId;
+const username = document.getElementById('memberUsername').value.trim();
+            const role = document.getElementById('memberRole').value;
+
+            if (!teamId) {
+                alert('Нужно выбрать команду');
+                return;
+            }
+            // verify team still exists
+            try {
+                const check = await fetch(`${API_URL}/teams/${teamId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!check.ok) {
+                    alert('Команда не найдена');
+                    closeAddMemberModal();
+                    return;
+                }
+            } catch (err) {
+                console.error('Error checking team:', err);
+                alert('Ошибка при проверке команды');
+                return;
+            }
+
+            try {
+                // First get user ID by username
+                // try to fetch single user by making use of username filter if supported
+                let user = null;
+                try {
+                    const lookup = await fetch(`${API_URL}/users/?username=${encodeURIComponent(username)}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (lookup.ok) {
+                        const result = await lookup.json();
+                        if (Array.isArray(result) && result.length > 0) {
+                            // take first exact-case-insensitive match
+                            user = result.find(u => u.username.toLowerCase() === username.toLowerCase());
+                            if (!user) user = result[0];
+                        }
+                    }
+                } catch (err) {
+                    // ignore and fallback to full list
+                }
+                if (!user) {
+                    const usersRes = await fetch(`${API_URL}/users/`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!usersRes.ok) throw new Error('Не удалось получить список пользователей');
+                    const users = await usersRes.json();
+                    user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+                }
+                if (!user) {
+                    alert('Пользователь не найден');
+                    return;
+                }
+
+                const res = await fetch(`${API_URL}/teams/${teamId}/members`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: user.id, role: role })
+                });
+
+                if (res.ok) {
+                    closeAddMemberModal();
+                    document.getElementById('memberUsername').value = '';
+                    alert('Участник добавлен в команду');
+                    await loadData();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.detail || 'Не удалось добавить участника');
+                }
+            } catch (error) {
+                console.error('Error adding member:', error);
+                alert('Ошибка при добавлении участника');
+            }
+        }
+
+        function openProfileModal() {
+            // Заполняем форму текущими данными пользователя
+            document.getElementById('profileUsername').value = currentUser.username;
+            document.getElementById('profilePassword').value = '';
+            document.getElementById('profileConfirmPassword').value = '';
+            document.getElementById('profileModal').classList.add('show');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('show');
+        }
+
+        async function updateProfile(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const username = document.getElementById('profileUsername').value.trim();
+            const password = document.getElementById('profilePassword').value;
+            const confirmPassword = document.getElementById('profileConfirmPassword').value;
+
+            // Валидация
+            if (!username) {
+                alert('Имя пользователя обязательно');
+                return;
+            }
+
+            if (password && password !== confirmPassword) {
+                alert('Пароли не совпадают');
+                return;
+            }
+
+            const updateData = { username };
+            if (password) {
+                updateData.password = password;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/auth/me`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (res.ok) {
+                    const updatedUser = await res.json();
+                    currentUser = updatedUser;
+                    document.getElementById('username').textContent = updatedUser.username;
+                    document.getElementById('userAvatar').textContent = updatedUser.username[0].toUpperCase();
+                    document.getElementById('welcomeUser').textContent = `, ${updatedUser.username}!`;
+                    closeProfileModal();
+                    alert('Профиль обновлен успешно');
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.detail || 'Не удалось обновить профиль');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                alert('Ошибка при обновлении профиля');
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clockDisplay').textContent = `${hours}:${minutes}`;
+
+            const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+            const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+            
+            const dayName = days[now.getDay()];
+            const date = now.getDate();
+            const month = months[now.getMonth()];
+            document.getElementById('dateDisplay').textContent = `${dayName}, ${date} ${month}`;
+
+            document.getElementById('monthDisplay').textContent = `${month} ${now.getFullYear()}`;
+
+            // Generate mini calendar
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            const daysCount = lastDay.getDate();
+            const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+
+            let calendarHTML = '';
+            for (let i = 0; i < startDay; i++) {
+                calendarHTML += '<div></div>';
+            }
+            for (let i = 1; i <= daysCount; i++) {
+                const isToday = i === now.getDate();
+                calendarHTML += `<div class="${isToday ? 'today' : ''}">${i}</div>`;
+            }
+            document.getElementById('miniCalendar').innerHTML = calendarHTML;
+        }
+        
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
+        }
+        
+        window.onclick = (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('show');
+            }
+        }
+        
+        // Update clock every minute
+        updateClock();
+        setInterval(updateClock, 60000);
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taskteam-app
+    environment:
+      - DATABASE_URL=sqlite:///./test.db
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_DAYS=7
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./database:/app/database
+    # Run uvicorn with app-dir set to backend so imports like `from database` work
+    command: python -m uvicorn main:app --app-dir backend --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - taskteam-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: taskteam-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - app
+    networks:
+      - taskteam-network
+
+networks:
+  taskteam-network:
+    driver: bridge
