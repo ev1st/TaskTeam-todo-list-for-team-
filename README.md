@@ -138,10 +138,4 @@ taskteam/
 
 ## 👥 Авторы
 
-- ev1st — *Разработка* — [ваш-github](https://github.com/ev1st)
-
-## 🙏 Благодарности
-
-- FastAPI за отличный фреймворк
-- SQLAlchemy за мощную ORM
-- Весь open-source сообщество
+- ev1st — *Разработка* — [мой-github](https://github.com/ev1st)
