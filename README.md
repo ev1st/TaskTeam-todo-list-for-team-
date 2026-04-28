@@ -138,7 +138,7 @@ taskteam/
 
 ## 👥 Авторы
 
-- **Ваше Имя** — *Разработка* — [ваш-github](https://github.com/your-username)
+- ev1st — *Разработка* — [ваш-github](https://github.com/ev1st)
 
 ## 🙏 Благодарности
 
